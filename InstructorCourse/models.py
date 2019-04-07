@@ -10,4 +10,4 @@ class InstructorCourse(models.Model):
     Course = models.ForeignKey(Course, on_delete=models.CASCADE)
 
     def __str__(self):
-        return str(self.Instructor) + str(self.Course)
+        return str(self.Instructor) + " " + str(self.Course)

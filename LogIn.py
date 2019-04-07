@@ -45,4 +45,4 @@ class LoginHelper():
         except Account.MultipleObjectsReturned:
             return "Multiple account Logged in, Something went terribly wrong"
 
-        return "Successfully logged out"
+

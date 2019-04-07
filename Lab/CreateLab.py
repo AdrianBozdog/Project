@@ -6,7 +6,7 @@ import re
 class CreateLab():
 
     def createLab(self, command):
-        if len(command) > 6 or len(command) < 6:
+        if len(command) != 6:
             return "Your command is missing arguments, please enter your command in the following format: " \
                    "createLab courseNumber labSectionNumber daysOfWeek beginTime endTime"
 

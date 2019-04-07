@@ -13,11 +13,12 @@ class TestCreateAccountLogin(TestCase):
         self.LH = LoginHelper()
 
     def test00(self):
-        self.assertEqual(self.CA.createAccount(["createaccount", "hsimpson", "ta", "what@uwm.edu"]), "Account successfully created")
+        self.assertEqual(self.CA.createAccount(["createaccount", "hsimpson", "ta", "what@uwm.edu"]),
+                         "Account successfully created.  Temporary password is: hsimpson456")
 
         self.assertFalse(self.CUH.isCurrent())
 
-        self.assertEqual(self.LH.login(["login", "hsimpson", "password"]),"Logged in as hsimpson")
+        self.assertEqual(self.LH.login(["login", "hsimpson", "hsimpson456"]), "Logged in as hsimpson")
 
         self.assertTrue(self.CUH.isCurrent())
 

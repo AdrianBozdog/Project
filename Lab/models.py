@@ -13,4 +13,4 @@ class Lab(models.Model):
     endTime = models.IntegerField(default=0000)
 
     def __str__(self):
-        return str(self.course)
+        return str(self.course) + " section " + str(self.sectionNumber)
