@@ -1,13 +1,23 @@
 from Account.models import Account
-from random import randint
 
 
-class CreateAccount():
+class CreateAccount:
+
+    """
+    This method will create an account given a list of strings, "command"
+        command[0] = createAccount
+        command[1] = username
+        command[2] = title
+        command{3] = email
+
+    If given valid values, the account will be created, fill the other fields to default values, and add it to the
+    database. A confirmation message will be returned. If any arguments are invalid, an error message will be returned.
+    """
 
     def createAccount(self, command):
 
         # Check that the command has the correct number of arguments
-        if len(command) > 4 or len(command) < 4:
+        if len(command) != 4:
             return "Your command is missing arguments, please enter your command in the following format: " \
                    "createAccount username title email"
 
@@ -23,6 +33,8 @@ class CreateAccount():
         if str[1] != "uwm.edu":
             return "The email address you have entered in not valid.  " \
                     "Please make sure you are using a uwm email address in the correct format."
+
+        # If we get here the account is safe to be created.
         else:
             A = Account()
             A.userName = command[1]
@@ -34,7 +46,8 @@ class CreateAccount():
             else:
                 return "Invalid title, account not created"
 
-            A.password=A.userName + "456"
+            # Make a temporary password for the newly created user
+            A.password = A.userName + "456"
             A.save()
 
             return "Account successfully created.  Temporary password is: " + A.userName + "456"

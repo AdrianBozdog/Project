@@ -3,7 +3,20 @@ from Course.models import Course
 import re
 
 
-class CreateLab():
+class CreateLab:
+
+    """
+    CreateLab will create a lab given a list of strings, "command"
+        command[0] = "createLab"
+        command[1] = courseNumber of a course that exists in the database
+        command[2] = sectionNumber for the lab
+        command[3] = meeting days of lab
+        command[4] = start time
+        command[5] = end time
+
+    If given valid input, the lab will be created and linked to the course it is for and the database
+    will be updated. A confirmation message will be returned. If any arguments are invalid, an error message will be returned.
+    """
 
     def createLab(self, command):
         if len(command) != 6:
@@ -28,6 +41,7 @@ class CreateLab():
         except Course.DoesNotExist:
             return "The Course you are trying to create a lab for does not exist"
 
+        # Make sure the course is not online
         if c.onCampus == False:
             return "You cannot create a lab for an online course"
 
@@ -43,9 +57,9 @@ class CreateLab():
                 return "Invalid days of the week, please enter days in the format: MWTRF"
 
         # Time checks
-        if (len(startTime) < 4 or len(endTime) < 4) or (len(startTime) > 4 or len(endTime) > 4):
+        if len(startTime) != 4 or len(endTime) != 4:
             return "Invalid start or end time, please use a 4 digit military time representation"
-        if not re.match('^[0-2]*$', startTime[0]) or not re.match('^[0-1]*$', endTime[0]):
+        if not re.match('^[0-2]*$', startTime[0]) or not re.match('^[0-2]*$', endTime[0]):
             return "Invalid start or end time, please use a 4 digit military time representation"
         for i in range(1, 3):
             if not (re.match('^[0-9]*$', startTime[i])) or not (re.match('^[0-9]*$', endTime[i])):

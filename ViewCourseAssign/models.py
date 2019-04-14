@@ -2,19 +2,24 @@ from Account.models import Account
 from TaLab.models import TaLab
 from InstructorCourse.models import InstructorCourse
 from TACourse.models import TACourse
-# Create your models here.
 
 
-class viewCourseAssign():
+class viewCourseAssign:
+
     """
-    ViewCourseAssign takes a list of strings as an arguments. Command[1] is the account userName. If the account
-    is a valid TA or Instructor account, viewCrouseAssign will return a string containing a comma separated list of all
-    of the Courses and Lab sections that the Account is assigned to.
+    ViewCourseAssign will display course assignments given a list of strings, "command"
+        command[0] = "viewcourseassignments"
+        command[1] = userName of an account that exists
+
+    If the username is a valid TA or Instructor account, viewCourseAssign will return a string containing a comma separated list of all
+    of the Courses and Lab sections that the Account is assigned to. Otherwise, it will return an error message.
     """
+
     def viewCourseAssign(self, command):
 
-        if len(command) < 2:
-            return "Please enter the userName of the Account"
+        if len(command) != 2:
+            return "Your command has an invalid number of arguments. Please enter your command in the following format: " \
+                   "viewCourseAssignments userName"
 
         if not Account.objects.filter(userName=command[1]).exists():
             return "Account not found"

@@ -5,16 +5,22 @@ from Course.models import Course
 from TACourse.models import TACourse
 
 
-class AssignTaLab():
+class AssignTaLab:
 
     """
-    assignTaLab takes a list of strings as an argument. Command[1] is the Account username, Command[2] is the Course
-    number and Command[3] is the Lab number. AssignTALAb creates  new TALab assignment if the account, lab, and course
-    are all valid and the assignment doesn't already exist.
+    assignTaLab will assign a TA to a lab section given a list of strings, "command"
+        command[1] = username of a TA that already exists
+        command[2] = courseNumber of a course that already exists
+        command[3] = section number of a lab that already exists
+
+    AssignTaLAb creates a new TALab assignment if the account, lab, and course
+    are all valid and the assignment doesn't already exist. The database will be updated. A confirmation
+    message will be returned. If any arguments are invalid, an error message will be returned.
     """
+
     def assignTaLab(self, command):
-        if len(command) < 4:
-            return "Your argument is missing commands, please enter your command in the following format: " \
+        if len(command) != 4:
+            return "Your command has an invalid number of arguments. Please enter your command in the following format: " \
                    "assignTALab username classNumber labSectionNumber"
 
         if not Account.objects.filter(userName=command[1]).exists():

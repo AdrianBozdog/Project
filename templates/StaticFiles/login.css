@@ -1,0 +1,47 @@
+/*body{
+        background-image: url(logo2.png), url(background.png);
+        background-repeat: no-repeat, no-repeat;
+        background-position: center,left;
+        color: black;
+    }*/
+body{
+        background-image: url(logo2.png);
+        background-repeat: no-repeat;
+        background-position: center;
+        background-size: auto;
+        text-align: center;
+        padding-top: 436px;
+    }
+html{
+    background: url(background.png) no-repeat center fixed;
+    background-size: cover;
+}
+form{
+    display: inline-block;
+}
+#password
+{
+    border-color: red;
+    height : 30px;
+    width: 200px;
+}
+#username
+{
+    border-color: blue;
+    height: 30px;
+    width: 200px;
+}
+#submit
+{
+    width: 75px;
+    height: 25px;
+    background-color: grey;
+    border: none;
+    color: white;
+    position: center;
+}
+#message
+{
+    font-weight: bolder;
+    color: red;
+}

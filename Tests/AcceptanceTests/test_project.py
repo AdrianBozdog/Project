@@ -4,10 +4,8 @@ from Account.models import Account
 from Lab.models import Lab
 from Course.models import Course
 from LogIn import LoginHelper
-"""
-TODO: 
-add permission denied tests - in progress
-"""
+from InstructorCourse.models import InstructorCourse
+from TACourse.models import TACourse
 
 
 class TestProject(TestCase):
@@ -15,7 +13,6 @@ class TestProject(TestCase):
     def setUp(self):
         self.UI = UI()
         self.LH = LoginHelper()
-
 
         # Set up for accounts testing
         Account.objects.create(userName="janewayk123", firstName="Kathryn", lastName="Janeway", password="123456",
@@ -38,7 +35,7 @@ class TestProject(TestCase):
 
         Account.objects.create(userName="taman", title=1)
 
-        #Set up for Course testing
+        # Set up for Course testing
         Course.objects.create(name="DataStructures", number=351, onCampus=True, classDays="TR",
                               classHoursStart=1200, classHoursEnd=1300)
 
@@ -49,8 +46,7 @@ class TestProject(TestCase):
 
         Lab.objects.create(course=Course.objects.get(number="458"), sectionNumber=804)
 
-
-        #Set up for Labs testing
+        # Set up for Labs testing
         Course.objects.create(name="TemporalMechanics", number=784, onCampus=True, classDays="MW",
                               classHoursStart=1000, classHoursEnd=1100)
 
@@ -71,26 +67,40 @@ class TestProject(TestCase):
         Lab.objects.create(course=self.c1, sectionNumber=202, meetingDays="F", startTime=1400, endTime=1700)
         Lab.objects.create(course=self.c1, sectionNumber=203, meetingDays="T", startTime=1000, endTime=1200)
 
-        #set up for InstructorCourses testing
-        Account.objects.create(userName="cheng41", title="2")
-        Course.objects.create(number="535")
-        Course.objects.create(number="317")
+        # set up for InstructorCourses testing
+        self.cheng = Account.objects.create(userName="cheng41", title="2")
+        Account.objects.create(userName="bob15", title="2")
+        Course.objects.create(number="535", name="Algorithms")
+        Course.objects.create(number="537")
+        Course.objects.create(number="317", name="DiscreteMath")
         self.course1 = Course.objects.get(number="535")
         self.course2 = Course.objects.get(number="317")
+        InstructorCourse.objects.create(Course=self.course1, Instructor=self.cheng)
+
+        TACourse.objects.create(TA=Account.objects.get(userName="taman"), Course=Course.objects.get(number="317"))
+
+        # set up for assign TA to Lab
+        self.datastructures = Course.objects.get(name="DataStructures")
+        self.tamanAccount = Account.objects.get(userName="taman")
+
 
     """
         login command
         When the login command is entered, it takes two arguments
         -user name
         -password
-        
+
         If the account does not exist, an error message will be displayed.  If the password it incorrect, 
         an error message will be displayed.  If the command is missing arguments, an error message will be 
         displayed. 
-    
+
     """
+
     def test_command_login_success(self):
         self.assertEqual(self.UI.command("login janewayk123 123456"), "Logged in as janewayk123")
+
+    def test_command_login_success_whitespace(self):
+        self.assertEqual(self.UI.command("  login     janewayk123   123456     "), "Logged in as janewayk123")
 
     def test_command_login_incorrect_password(self):
         self.assertEqual(self.UI.command("login janewayk123 aaaaaaa"), "Incorrect password")
@@ -100,7 +110,8 @@ class TestProject(TestCase):
 
     def test_command_login_missing_args(self):
         self.assertEqual(self.UI.command("login janewayk123"), "Your command is missing arguments.  "
-                                        "Please enter your command in the following format: login userName password")
+                                                               "Please enter your command in the following format: login userName password")
+
     """ 
     createAccount command
     When the createAccount command is entered, it takes 3 arguments:
@@ -124,14 +135,14 @@ class TestProject(TestCase):
     def test_command_createAccount_missingArguments(self):
         LoginHelper.login(self.LH, ["login", "kirkj22", "678543"])
         self.assertEqual(self.UI.command("createAccount laForge88"),
-                        "Your command is missing arguments, please enter your command in the following format: "
-                        "createAccount username title email")
+                         "Your command is missing arguments, please enter your command in the following format: "
+                         "createAccount username title email")
 
     def test_command_createAccount_missingArguments2(self):
         LoginHelper.login(self.LH, ["login", "kirkj22", "678543"])
         self.assertEqual(self.UI.command("createAccount laForge88 instructor"),
-                        "Your command is missing arguments, please enter your command in the following format: "
-                        "createAccount username title email")
+                         "Your command is missing arguments, please enter your command in the following format: "
+                         "createAccount username title email")
 
     def test_command_createAccount_invalidTitle(self):
         LoginHelper.login(self.LH, ["login", "kirkj22", "678543"])
@@ -167,12 +178,12 @@ class TestProject(TestCase):
         -Meetings days (if online, enter NN)  
         -Start time (if online, enter 0000)
         -End time (if online, enter 0000)
-           
+
         If the course name matches a database entry a then the course is not created 
         and an error message is displayed and some other stuff
-           
+
         If a command argument is missing, an error message is displayed. 
-            
+
     """
 
     def test_command_createCourse_permission_denied(self):
@@ -248,7 +259,6 @@ class TestProject(TestCase):
         self.assertEqual(self.UI.command("createCourse StellarCartography 456 Campus MW 1830 4444"),
                          "Invalid start or end time, please use a 4 digit military time representation")
 
-
     """
         When the createLab command is entered, it takes the following arguments:
         -Course number associated with the lab 
@@ -259,8 +269,6 @@ class TestProject(TestCase):
         If the lab already exists, a new lab is not created. If arguments are missing, return error. If the 
         associated course is online, a lab cannot be created for it.
     """
-    # Need a test for trying to create a lab for a course that doesn't exist
-    # msg: "The Course you are trying to create a lab for does not exist"
 
     def test_command_createLab_permission_denied(self):
         LoginHelper.login(self.LH, ["login", "janewayk123", "123456"])
@@ -373,10 +381,10 @@ class TestProject(TestCase):
             - Office phone Number
             - Password 
         -The new information to replace the current information 
-        
+
         If the user does not exist, an error message is displayed.
         If command arguments are missing, an error message is displayed. 
-    
+
        """
 
     def test_command_edit_permission_denied(self):
@@ -385,7 +393,7 @@ class TestProject(TestCase):
 
     def test_command_edit_homePhone_success(self):
         self.assertEqual(self.UI.command("edit username homephone 262-555-7134"),
-                        "Home phone successfully updated")
+                         "Home phone successfully updated")
 
     def test_command_edit_email_success(self):
         self.assertEqual(self.UI.command("edit username email timmy345@uwm.edu"),
@@ -471,17 +479,16 @@ class TestProject(TestCase):
         self.assertEqual(self.UI.command("send accountNames -s"),
                          "There was an error, notification not sent")
 
-    #def test_command_send_no_argument(self):
+    # def test_command_send_no_argument(self):
     #    self.assertEqual(self.UI.command("send -s"),
     #                     "")
 
-    #def test_command_send_no_argument_2(self):
+    # def test_command_send_no_argument_2(self):
     #        self.assertEqual(self.UI.command("send -a"),
     #                         "Please type the user names  that you want to sent")
 
-    #def test_command_send_no_argument_3(self):
+    # def test_command_send_no_argument_3(self):
     #    self.assertEqual(self.UI.command("sendNotification"), "Please type the username that you want to sent")
-
 
     """
         sendTA command
@@ -511,17 +518,15 @@ class TestProject(TestCase):
     """
 
     def test_command_deleteAccount(self):
-            self.assertEqual(self.UI.command("deleteAccount userName"), "Account successfully deleted")
+        self.assertEqual(self.UI.command("deleteAccount userName"), "Account successfully deleted")
 
     def test_command_deleteAccount_no_name(self):
-            self.assertEqual(self.UI.command("deleteAccount"),
-                             "There are arguments missing, please enter your command in the following format: "
-                             "deleteAccount userName")
+        self.assertEqual(self.UI.command("deleteAccount"),
+                         "There are arguments missing, please enter your command in the following format: "
+                         "deleteAccount userName")
 
     def test_command_deleteAccount_doesNotExist(self):
-            self.assertEqual(self.UI.command("deleteAccount userName"), "Error, Account does not exist")
-
-
+        self.assertEqual(self.UI.command("deleteAccount userName"), "Error, Account does not exist")
 
     """
         When the assignInstructorCourse command is entered it takes 2 arguments: 
@@ -531,18 +536,19 @@ class TestProject(TestCase):
 
     def test_command_assignInstructorCourse_permission_denied(self):
         LoginHelper.login(self.LH, ["login", "janewayk123", "123456"])
-        self.assertEqual(self.UI.command("assigninstructorcourse userName number"),
+        self.assertEqual(self.UI.command("assigninstructorcourse cheng41 535"),
                          "You do not have the credentials to assign an instructor to a course. Permission denied")
         LoginHelper.logout(self.LH)
 
     def test_command_assignInstructorCourse_missingArguments(self):
         LoginHelper.login(self.LH, ["login", "kirkj22", "678543"])
-        self.assertEqual(self.UI.command("assigninstructorcourse userName"),  "Your argument is missing commands, " \
-                   "please enter your command in the following format: assigninstructorcourse userName courseNumber")
+        self.assertEqual(self.UI.command("assigninstructorcourse cheng41"),
+                         "There are arguments missing, Please enter your command in the following format: "
+                         "assigninstructorcourse userName courseNumber")
 
     def test_command_assignInstructorCourse_missingArguments2(self):
         LoginHelper.login(self.LH, ["login", "kirkj22", "678543"])
-        self.assertEqual(self.UI.command("assigninstructorcourse number"),
+        self.assertEqual(self.UI.command("assigninstructorcourse 535"),
                          "There are arguments missing, Please enter your command in the following format: "
                          "assigninstructorcourse userName courseNumber")
 
@@ -554,13 +560,25 @@ class TestProject(TestCase):
 
     def test_command_assignInstructorCourse_conflict(self):
         LoginHelper.login(self.LH, ["login", "kirkj22", "678543"])
-        self.assertEqual(self.UI.command("assigninstructorcourse userName 101"),
-                         "This class was already assigned")
+        self.assertEqual(self.UI.command("assigninstructorcourse bob15 535"),
+                         "This class is already assigned")
 
     def test_command_assignInstructorCourse_success(self):
         LoginHelper.login(self.LH, ["login", "kirkj22", "678543"])
-        self.assertEqual(self.UI.command("assigninstructorcourse userName 101"),
+        self.assertEqual(self.UI.command("assigninstructorcourse cheng41 537"),
                          "Instructor was successfully assigned to class")
+
+    def test_command_assignInstructorCourse_notInstructor(self):
+        LoginHelper.login(self.LH, ["login", "kirkj22", "678543"])
+        self.assertEqual(self.UI.command("assigninstructorcourse kirkj22 535"), "Account is not an instructor")
+
+    def test_command_assignInstructorCourse_bad_username(self):
+        LoginHelper.login(self.LH, ["login", "kirkj22", "678543"])
+        self.assertEqual(self.UI.command("assigninstructorcourse userName 535"), "Invalid user name")
+
+    def test_command_assingInstructorCourse_course_doesNotExist(self):
+        LoginHelper.login(self.LH, ["login", "kirkj22", "678543"])
+        self.assertEqual(self.UI.command("assigninstructorcourse bob15 999"), "Invalid course number")
 
     """
         When assignTACourse command is entered, it takes two arguments:
@@ -570,43 +588,55 @@ class TestProject(TestCase):
         --Scheduling conflict for TA
         --Max TAs assigned to course
         --TA username is invalid or missing
-        --Course number is invalid or missing
+        --Course number is invalid or missingmissingCourse
         --No arguments    
     """
 
+    def test_command_assignTACourse_success_whiteSpace(self):
+        LoginHelper.login(self.LH, ["login", "kirkj22", "678543"])
+        self.assertEqual(self.UI.command("assignTACourse picard304 351  "), "Assignment successful.")
+
     def test_command_assignTACourse_success(self):
         LoginHelper.login(self.LH, ["login", "kirkj22", "678543"])
-        self.assertEqual(self.UI.command("assignTACourse userName courseNumber"), "Assignment successful")
+        self.assertEqual(self.UI.command("assignTACourse picard304 351"), "Assignment successful.")
 
-    def test_command_assignTACourse_missingTA(self):
-        self.assertEqual(self.UI.command("assignTACourse courseNumber"),
-                         "Your command is missing arguments, please enter your command in the following format: "
+    def test_command_assignTACourse_tooFew(self):
+        LoginHelper.login(self.LH, ["login", "kirkj22", "678543"])
+        self.assertEqual(self.UI.command("assignTACourse 351"),
+                         "Your command has an incorrect number of arguments, please enter your command in the following format: "
                          "assignTACourse userName classNumber")
 
     def test_command_assignTACourse_invalidTA(self):
-        self.assertEqual(self.UI.command("assignTACourse userName courseNumber"), "Invalid TA username.")
+        LoginHelper.login(self.LH, ["login", "kirkj22", "678543"])
+        self.assertEqual(self.UI.command("assignTACourse picard305 351"), "Invalid TA username.")
 
-    def test_command_assignTACourse_missingCourse(self):
-        self.assertEqual(self.UI.command("assignTACourse accountName"),
-                         "Your command is missing arguments, please enter your command in the following format: "
+    def test_command_assignTACourse_tooMany(self):
+        LoginHelper.login(self.LH, ["login", "kirkj22", "678543"])
+        self.assertEqual(self.UI.command("assignTACourse picard304 351 535"),
+                         "Your command has an incorrect number of arguments, please enter your command in the following format: "
                          "assignTACourse userName classNumber")
 
     def test_command_assignTACourse_invalidCourse(self):
-        self.assertEqual(self.UI.command("assignTACourse accountName courseNumber"), "Invalid course number.")
+        LoginHelper.login(self.LH, ["login", "kirkj22", "678543"])
+        self.assertEqual(self.UI.command("assignTACourse picard304 387"), "Invalid course number.")
 
-    def test_command_assignTACourse_Maximum(self):
-        self.assertEqual(self.UI.command("assignTACourse userName courseNumber"),
-                         "TA has exceeded assignment limit, TA not assigned")
+    def test_command_assignTACourse_invalidTitle(self):
+        LoginHelper.login(self.LH, ["login", "kirkj22", "678543"])
+        self.assertEqual(self.UI.command("assignTACourse janewayk123 351"), "Account is not a TA.")
 
-    def test_command_assignTACourse_schedulingConflict(self):
-        self.assertEqual(self.UI.command("assignTACourse userName courseNumber"),
-                         "Scheduling conflict encountered, TA not assigned.")
+    # def test_command_assignTACourse_Maximum(self):
+    #     self.assertEqual(self.UI.command("assignTACourse userName courseNumber"),
+    #                      "TA has exceeded assignment limit, TA not assigned")
+    #
+    # def test_command_assignTACourse_schedulingConflict(self):
+    #     self.assertEqual(self.UI.command("assignTACourse userName courseNumber"),
+    #                      "Scheduling conflict encountered, TA not assigned.")
 
     def test_command_assignTACourse_noArgs(self):
+        LoginHelper.login(self.LH, ["login", "kirkj22", "678543"])
         self.assertEqual(self.UI.command("assignTACourse"),
-                         "Your command is missing arguments, please enter your command in the following format: "
+                         "Your command has an incorrect number of arguments, please enter your command in the following format: "
                          "assignTACourse userName classNumber")
-
 
     """
         assignTALab
@@ -615,23 +645,26 @@ class TestProject(TestCase):
         -classNumber
         -Lab section number 
     """
+
     def test_command_assignTALab_noLogin(self):
-        self.assertEqual(self.UI.command("assignTALab taman 351 804"), "You do not have the credentials to assign a ta to a lab. Permission denied")
+        self.assertEqual(self.UI.command("assignTALab taman 351 804"),
+                         "You do not have the credentials to assign a ta to a lab. Permission denied")
 
     def test_command_assignTALab_success(self):
         LoginHelper.login(self.LH, ["login", "kirkj22", "678543"])
+        TACourse.objects.create(TA=self.tamanAccount, Course=self.datastructures)
         self.assertEqual(self.UI.command("assignTALab taman 351 804"), "TA successfully assigned")
 
-    def test_command_assignTALab_argumentsMissing(self):
+    def test_command_assignTALab_tooFew(self):
         LoginHelper.login(self.LH, ["login", "kirkj22", "678543"])
         self.assertEqual(self.UI.command("assignTALab username classNumber"),
-                         "Your argument is missing commands, please enter your command in the following format: "
+                         "Your command has an invalid number of arguments. Please enter your command in the following format: "
                          "assignTALab username classNumber labSectionNumber")
 
-    def test_command_assignTALab_argumentsMissing1(self):
+    def test_command_assignTALab_tooMany(self):
         LoginHelper.login(self.LH, ["login", "kirkj22", "678543"])
-        self.assertEqual(self.UI.command("assignTALab userName"),
-                         "Your argument is missing commands, please enter your command in the following format: "
+        self.assertEqual(self.UI.command("assignTALab userName classNumber labsection classNum"),
+                         "Your command has an invalid number of arguments. Please enter your command in the following format: "
                          "assignTALab username classNumber labSectionNumber")
 
     def test_command_assignTALab_invalidCourse(self):
@@ -655,7 +688,7 @@ class TestProject(TestCase):
     """
         When the viewInfo command is entered it takes one argument: 
         -accountName 
-        
+
         If the account does not exist, an error message is displayed, otherwise, public data is displayed   
     """
 
@@ -682,7 +715,7 @@ class TestProject(TestCase):
             -Address (entered as a string)
             -Password 
         -What the field should be changed to. 
-    
+
     """
 
     def test_command_editInfo_homePhone_success(self):
@@ -712,12 +745,42 @@ class TestProject(TestCase):
         When the viewCourseAssignments command is entered, it takes no arguments 
         It is implied that the viewCourseAssignments will display the course assignments 
         for the instructor who is currently logged in to the system. 
-    
+
     """
 
-    def test_command_viewCourseAssignments(self):
-        self.assertEqual(self.UI.command("viewCourseAssignments"), "")
+    def test_command_viewCourseAssignments_instnoAssign(self):
+        LoginHelper.login(self.LH, ["login", "kirkj22", "678543"])
+        self.assertEqual(self.UI.command("viewcourseassign janewayk123"), "janewayk123 does not have any assignments")
 
+    def test_command_viewCourseAssignments_TAnoAssign(self):
+        LoginHelper.login(self.LH, ["login", "kirkj22", "678543"])
+        self.assertEqual(self.UI.command("viewcourseassign picard304"), "picard304 does not have any assignments")
+
+    def test_command_viewCourseAssignments_instoneAssign(self):
+        LoginHelper.login(self.LH, ["login", "kirkj22", "678543"])
+        self.assertEqual(self.UI.command("viewcourseassign cheng41"), "cheng41 is assigned to: Algorithms")
+
+    def test_command_viewCourseAssignments_TAoneAssign(self):
+        LoginHelper.login(self.LH, ["login", "kirkj22", "678543"])
+        self.assertEqual(self.UI.command("viewcourseassign taman"), "taman is assigned to: DiscreteMath")
+
+    def test_command_viewCourseAssignments_invalidTitle(self):
+        LoginHelper.login(self.LH, ["login", "kirkj22", "678543"])
+        self.assertEqual(self.UI.command("viewcourseassign kirkj22"), "Only Ta and Instructor accounts can have Assignments")
+
+    def test_command_viewCourseAssignments_invalidName(self):
+        LoginHelper.login(self.LH, ["login", "kirkj22", "678543"])
+        self.assertEqual(self.UI.command("viewcourseassign kirkj2"), "Account not found")
+
+    def test_command_viewCourseAssignments_tooFew(self):
+        LoginHelper.login(self.LH, ["login", "kirkj22", "678543"])
+        self.assertEqual(self.UI.command("viewcourseassign"), "Your command has an invalid number of arguments. Please enter your command" \
+                                                                   " in the following format: viewCourseAssignments userName")
+
+    def test_command_viewCourseAssignments_tooMany(self):
+        LoginHelper.login(self.LH, ["login", "kirkj22", "678543"])
+        self.assertEqual(self.UI.command("viewcourseassign jane kirk"), "Your command has an invalid number of arguments. Please enter your command" \
+                                                                   " in the following format: viewCourseAssignments userName")
 
     """
        When the viewTAAssignments command is entered, it takes one argument
@@ -725,7 +788,7 @@ class TestProject(TestCase):
 
        If the class Number is not entered, an error message is displayed
        If the class does not exist, an error message is displayed 
-       
+
     """
 
     def test_command_viewTAAssignments_success(self):
