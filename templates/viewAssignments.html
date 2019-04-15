@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<form method="post" action="/viewtaassignments/">
+    {%csrf_token%}
+<select name = "taAccount" onchange="this.form.submit()">
+        <option>--</option>
+        <option value="all">All</option>
+    {%for i   in taList %}
+        <option value={{ i }}>{{ i }}</option>
+    {% endfor %}
+</select>
+<noscript><input type = "submit" value="Submit"></noscript>
+</form>
+{{ assignments }}
+{% for i in allassignments %}
+    {{ i }}<br>
+{% endfor %}
+</body>
+</html>

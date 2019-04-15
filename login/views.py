@@ -5,12 +5,16 @@ from login.models import LoginHelper
 # Create your views here.
 
 
+def redirect_view(request):
+    return redirect('/login/')
+
+
 class loginPage(View):
 
     def get(self, request):
         LH = LoginHelper()
         LH.logout()
-        return render(request, 'loginscreen.html')
+        return render(request, 'loginscreen.html', {"message": ""})
 
     def post(self, request):
         LH = LoginHelper()

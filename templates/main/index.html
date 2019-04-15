@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% block content %}
-  <form method="post" action="/"> 
+  <form method="post" action="/command/">
   {% csrf_token %}
       <label for="command" name="commandLabel" id="label"><font size="30">Command:</font></label>
       <!--Command:-->  <input type="text" name="command" id="command"></font><br/>

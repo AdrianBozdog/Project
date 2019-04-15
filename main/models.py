@@ -6,7 +6,7 @@ from Course.CreateCourse import CreateCourse
 from CurrentUserHelper import CurrentUserHelper
 from TaLab.AssignTaLab import AssignTaLab
 from TACourse.AssignTACourse import AssignTACourse
-from ViewCourseAssign.models import viewCourseAssign
+from ViewCourseAssign.models import viewTaAssignments
 from InstructorCourse.assignInst import assignInst
 # Create your models here.
 
@@ -88,9 +88,7 @@ class UI:
             if CUH.getCurrentUserTitle() < 1:
                 return "You must log in to View Course Assignment"
 
-            VCA = viewCourseAssign()
-
-            return VCA.viewCourseAssign(command)
+            return viewTaAssignments(command)
 
         else:
             return command[0] + " is an unsupported command"

@@ -25,3 +25,37 @@ class Account(models.Model):
         return self.userName
 
 
+    def createAccountModels(self, command):
+
+        # Check that the account trying to be created does not already exist
+        if Account.objects.filter(userName=command[0]).exists():
+            raise Exception("Account already exists")
+
+        # Make sure the account is trying to be created with a UWM email address
+        str = command[2].split('@', 1)
+        if len(str) == 1:
+            raise Exception("The email address you have entered in not valid.  "
+                   "Please make sure you are using a uwm email address in the correct format.")
+        if str[1] != "uwm.edu":
+            raise Exception("The email address you have entered in not valid.  "
+                   "Please make sure you are using a uwm email address in the correct format.")
+
+        # If we get here the account is safe to be created.
+        else:
+            A = Account()
+            A.userName = command[0]
+            A.email = command[2]
+            A.firstName = command[3]
+            A.lastName = command[4]
+            if command[1].lower() == "ta":
+                A.title = 1
+            elif command[1].lower() == "instructor":
+                A.title = 2
+            else:
+                raise Exception("Invalid title, account not created")
+
+            # Make a temporary password for the newly created user
+            A.password = A.userName + "456"
+            A.save()
+
+            return "Account successfully created.  Temporary password is: " + A.userName + "456"

@@ -14,7 +14,7 @@ body{
     }
 html{
     background: url(background.png) no-repeat center fixed;
-    background-size: cover;
+    background-size: auto;
 }
 form{
     display: inline-block;
@@ -40,8 +40,15 @@ form{
     color: white;
     position: center;
 }
-#message
-{
+.blinking{
+    animation: blinkingText 0.8s infinite;
     font-weight: bolder;
     color: red;
+}
+@keyframes blinkingText{
+    0%{     color: #000;    }
+    49%{    color: transparent; }
+    50%{    color: transparent; }
+    99%{    color:transparent;  }
+    100%{   color: #000;    }
 }

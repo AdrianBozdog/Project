@@ -19,15 +19,20 @@ from django.contrib import admin
 from main import views as main
 from login import views as login
 from Account import views as account
+from ViewCourseAssign import views as vca
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
+
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path("", main.Home.as_view()),
+    path("", login.redirect_view),
+    path("command/", main.Home.as_view()),
     path("login/", login.loginPage.as_view()),
     path("administrator/", account.adminPage.as_view()),
     path("supervisor/", account.supervisorPage.as_view()),
     path("instructor/", account.instructorPage.as_view()),
-    path("ta/", account.taPage.as_view())
+    path("ta/", account.taPage.as_view()),
+    path("createaccount/", account.createAccountView.as_view()),
+    path("viewtaassignments/", vca.viewTaAssign.as_view())
 ]
 
 urlpatterns += staticfiles_urlpatterns()
